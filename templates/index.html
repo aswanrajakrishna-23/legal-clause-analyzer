@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Clause Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Legal Clause Analyzer</h1>
+
+        <div class="card">
+            <h2 style="font-size: 1.1rem; margin-bottom: 16px; color: var(--text-muted); font-weight: 500;">Input Text
+            </h2>
+            <textarea id="inputText"
+                placeholder="Paste your legal text here... e.g., 'If the product is defective, then the seller shall replace it.'"></textarea>
+            <div class="btn-group">
+                <button onclick="analyzeText()">Analyze Text</button>
+            </div>
+        </div>
+
+        <div id="results-container" style="display: none;">
+            <h2 style="font-size: 1.1rem; margin-bottom: 16px; color: var(--text-muted); font-weight: 500;">Analysis
+                Results</h2>
+            <div id="results"></div>
+
+            <div id="downloads" style="display:none;">
+                <button class="secondary" onclick="downloadPDF()">Download PDF</button>
+                <button class="secondary" onclick="downloadDOCX()">Download DOCX</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentClauses = [];
+
+        async function analyzeText() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) return;
+
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Analyzing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                currentClauses = await response.json();
+                displayResults(currentClauses);
+
+                document.getElementById('results-container').style.display = 'block';
+                if (currentClauses.length > 0) {
+                    document.getElementById('downloads').style.display = 'flex';
+                }
+            } catch (e) {
+                console.error(e);
+                alert('An error occurred during analysis.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function displayResults(clauses) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (clauses.length === 0) {
+                resultsDiv.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">No clauses detected.</div>';
+                return;
+            }
+
+            clauses.forEach(clause => {
+                const div = document.createElement('div');
+                div.className = `clause-card ${clause.type.split(' ')[0].toLowerCase()}`; // e.g., 'condition'
+
+                // Determine color for tag based on type
+                let typeColor = 'var(--accent-purple)';
+                if (clause.type.includes('Exception')) typeColor = 'var(--accent-orange)';
+                if (clause.type.includes('Conditional')) typeColor = 'var(--accent-green)';
+
+                div.innerHTML = `
+                    <div class="clause-header">
+                        <span class="clause-type" style="color: ${typeColor}; background-color: ${typeColor}20;">${clause.type}</span>
+                    </div>
+                    <div class="clause-detail">
+                        <span class="label">Condition:</span>
+                        <span style="color: var(--text-main);">${clause.condition}</span>
+                    </div>
+                    <div class="clause-detail">
+                        <span class="label">Consequence:</span>
+                        <span style="color: var(--text-main);">${clause.consequence}</span>
+                    </div>
+                `;
+                resultsDiv.appendChild(div);
+            });
+        }
+
+        async function downloadPDF() {
+            const response = await fetch('/download/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clauses: currentClauses })
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'analysis_report.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        async function downloadDOCX() {
+            const response = await fetch('/download/docx', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clauses: currentClauses })
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'analysis_report.docx';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    </script>
+</body>
+
+</html>

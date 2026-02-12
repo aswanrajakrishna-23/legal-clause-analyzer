@@ -1,0 +1,66 @@
+[Condition Clause]
+Condition: the tenant fails to pay rent
+Consequence: the landlord may terminate the agreement
+
+[Condition Clause]
+Condition: the buyer does not make the payment on time
+Consequence: the seller will cancel the order
+
+[Condition Clause]
+Condition: the product is damaged
+Consequence: the customer may request a replacement
+
+[Condition Clause]
+Condition: of late submission
+Consequence: the application will be rejected
+
+[Exception Clause]
+Condition: the employee provides valid justification
+Consequence: the company may deduct one day’s salary
+
+[Conditional Clause]
+Condition: the user submits all required documents
+Consequence: the bank shall approve the loan
+
+[Conditional Clause]
+Condition: the contractor completes the project before the deadline
+Consequence: the bonus shall be granted
+
+JSON Output:
+[
+  {
+    "type": "Condition Clause",
+    "condition": "the tenant fails to pay rent",
+    "consequence": "the landlord may terminate the agreement"
+  },
+  {
+    "type": "Condition Clause",
+    "condition": "the buyer does not make the payment on time",
+    "consequence": "the seller will cancel the order"
+  },
+  {
+    "type": "Condition Clause",
+    "condition": "the product is damaged",
+    "consequence": "the customer may request a replacement"
+  },
+  {
+    "type": "Condition Clause",
+    "condition": "of late submission",
+    "consequence": "the application will be rejected"
+  },
+  {
+    "type": "Exception Clause",
+    "condition": "the employee provides valid justification",
+    "consequence": "the company may deduct one day\u2019s salary"
+  },
+  {
+    "type": "Conditional Clause",
+    "condition": "the user submits all required documents",
+    "consequence": "the bank shall approve the loan"
+  },
+  {
+    "type": "Conditional Clause",
+    "condition": "the contractor completes the project before the deadline",
+    "consequence": "the bonus shall be granted"
+  }
+]
